@@ -83,6 +83,7 @@ VstVoidFunc x_dlfunc (void* handle, const char* symbol)
 #endif
 }
 
+static char libname[1024] = "";
 static char libpath[1024] = "";
 
 #ifdef WIN32
@@ -91,6 +92,11 @@ BOOL WINAPI DllMain (HINSTANCE handle, DWORD fdwReason, LPVOID lpvReserved)
 {
 	if (fdwReason == 1) {
 		GetModuleFileNameA (handle, libpath, 1024);
+
+		strcpy (libname, libpath);
+		char* dot = strrchr (libname, '.');
+		if (dot) { *dot = 0; }
+
 		char* sep = strrchr (libpath, '\\');
 		if (sep) { *sep = 0; }
 	}
@@ -105,10 +111,19 @@ static void on_load(void) {
 	dladdr ((void *)on_load, &dl_info);
 	strncpy (libpath, dl_info.dli_fname, 1024);
 	libpath[1023] = 0;
+
+	strcpy (libname, libpath);
+	char* dot = strrchr (libname, '.');
+	if (dot) { *dot = 0; }
+
 	char* sep = strrchr (libpath, '/');
 	if (sep) { *sep = 0; }
 }
 #endif
+
+const char* get_lib_name () {
+	return libname;
+}
 
 const char* get_lib_path () {
 	return libpath;
