@@ -190,18 +190,12 @@ VstPlugin* instantiate_vst (audioMasterCallback audioMaster)
 	 */
 
 
-#ifdef _WIN32
-# define COMPOSE_FN "%s\\%s"
-#else
-# define COMPOSE_FN "%s/%s"
-#endif
-
 	char fn[1024];
-	snprintf (fn, 1023, COMPOSE_FN, get_lib_path (), ".bundle");
+	snprintf (fn, 1023, "%s%s", get_lib_name (), ".bundle");
 	fn[1023] = 0;
 	bundles = load_file (fn);
 
-	snprintf (fn, 1023, COMPOSE_FN, get_lib_path (), ".whitelist");
+	snprintf (fn, 1023, "%s%s", get_lib_name (), ".whitelist");
 	fn[1023] = 0;
 	whitelist = load_file (fn);
 
@@ -225,7 +219,7 @@ VstPlugin* instantiate_vst (audioMasterCallback audioMaster)
 	if (id == 0) {
 		/* plugin shell -- list all available */
 #ifndef BUNDLES
-		snprintf (fn, 1023, COMPOSE_FN, get_lib_path (), ".blacklist");
+		snprintf (fn, 1023, "%s%s", get_lib_name (), ".blacklist");
 		fn[1023] = 0;
 		blacklist = load_file (fn);
 #endif
