@@ -43,19 +43,10 @@ class LV2ShellPlugin : public VstPlugin
 			unsigned int bndl_it = 0;
 			if (bundles) {
 				while (bundles[bndl_it]) {
-
-					char b_path[1024];
-#ifdef PLATFORM_WINDOWS
-					snprintf (b_path, 1023, "%s\\%s\\", get_lib_path (), bundles[bndl_it]);
-#else
-					snprintf (b_path, 1023, "%s/%s/", get_lib_path (), bundles[bndl_it]);
-#endif
-					b_path[1023] = 0;
-					++bndl_it;
-
-					LilvNode *node = lilv_new_file_uri (world, NULL, b_path);
+					LilvNode *node = lilv_new_file_uri (world, NULL, bundles[bndl_it]);
 					lilv_world_load_bundle (world, node);
 					lilv_node_free(node);
+					++bndl_it;
 				}
 			}
 
