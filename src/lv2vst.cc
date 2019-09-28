@@ -342,7 +342,9 @@ int32_t LV2Vst::get_vendor_version ()
 
 VstPlugCategory LV2Vst::get_category ()
 {
-	// TODO -- map LV2 categories
+	if (_desc->category != kPlugCategUnknown) {
+		return (VstPlugCategory) _desc->category;
+	}
 	if (_desc->nports_audio_in == 0 && _desc->nports_midi_in == 0) {
 		return kPlugCategGenerator;
 	}

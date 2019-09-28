@@ -49,6 +49,8 @@
 #include "loadlib.h"
 #include "lv2ttl.h"
 
+#include "vestige.h"
+
 #ifndef UINT32_MAX
 # define UINT32_MAX (4294967295U)
 #endif
@@ -190,6 +192,7 @@ class LV2Parser
 		LilvNode* lv2_enabled;
 		LilvNode* lv2_requiredOption;
 		LilvNode* lv2_InputPort;
+		LilvNode* uri_rdf_type;
 };
 
 LV2Parser::LV2Parser (RtkLv2Description* d, char const* const* bundles)
@@ -234,6 +237,7 @@ LV2Parser::LV2Parser (RtkLv2Description* d, char const* const* bundles)
 	lv2_enabled         = lilv_new_uri (world, LV2_CORE_PREFIX "enabled");
 	lv2_requiredOption  = lilv_new_uri (world, LV2_OPTIONS__requiredOption);
 	lv2_InputPort       = lilv_new_uri (world, LILV_URI_INPUT_PORT);
+	uri_rdf_type        = lilv_new_uri (world, LILV_NS_RDF "type");
 }
 
 LV2Parser::~LV2Parser ()
@@ -259,6 +263,7 @@ LV2Parser::~LV2Parser ()
 	lilv_node_free (lv2_enabled);
 	lilv_node_free (lv2_requiredOption);
 	lilv_node_free (lv2_InputPort);
+	lilv_node_free (uri_rdf_type);
 	lilv_world_free (world);
 }
 
@@ -295,6 +300,7 @@ int LV2Parser::parse (const char* plugin_uri)
 	desc->bundle_path = file_strdup (lilv_plugin_get_bundle_uri (p));
 	desc->dsp_path    = file_strdup (lilv_plugin_get_library_uri (p));
 	desc->gui_path    = 0;
+	desc->category    = kPlugCategUnknown;
 
 #ifdef CHECK_OPEN_ONLY
 	int fd = open (desc->dsp_path, 0);
@@ -338,8 +344,25 @@ int LV2Parser::parse (const char* plugin_uri)
 				err = 1;
 			}
 		}
+		lilv_nodes_free(features);
 	}
-	lilv_nodes_free(features);
+
+	LilvNodes* types = lilv_plugin_get_value (p, uri_rdf_type);
+	if (types) {
+		LILV_FOREACH(nodes, i, types) {
+			const char* type = lilv_node_as_uri (lilv_nodes_get (types, i));
+			if (!strcmp (type, LV2_CORE__AnalyserPlugin)) {
+				desc->category = kPlugCategAnalysis;
+			} else if (!strcmp (type, LV2_CORE__InstrumentPlugin)) {
+				desc->category = kPlugCategSynth;
+			} else if (!strcmp (type, LV2_CORE__OscillatorPlugin)) {
+				desc->category = kPlugCategGenerator;
+			} else if (!strcmp (type, LV2_CORE__SpatialPlugin)) {
+				desc->category = kPlugCategSpacializer;
+			}
+		}
+		lilv_nodes_free(types);
+	}
 
 	if (err) {
 		return err;

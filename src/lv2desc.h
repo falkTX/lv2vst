@@ -70,6 +70,7 @@ typedef struct _RtkLv2Description {
 	char* dsp_path;
 	char* gui_path;
 
+	int category;
 	int version_minor;
 	int version_micro;
 
