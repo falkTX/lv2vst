@@ -466,7 +466,7 @@ void LV2Vst::get_parameter_name (int32_t i, char* label)
 {
 	const LV2Port* l = index_to_desc (i);
 	if (l) {
-		strncpyn (label, l->name, 8);
+		strncpyn (label, l->name, 32);
 	}
 }
 
@@ -490,7 +490,7 @@ void LV2Vst::get_parameter_label (int32_t i, char* label)
 {
 	const LV2Port* l = index_to_desc (i);
 	if (l) {
-		strncpyn (label, l->doc, 8);
+		strncpyn (label, l->doc, 24);
 	}
 }
 
